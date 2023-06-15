@@ -123,11 +123,6 @@ const MappingPage = () => {
 		} catch (error) {
 			console.log(error);
 		}
-
-		// console.log(data);
-		// console.log(JSON.stringify(data));
-		// console.log(mapUrl);
-		// Perform any additional logic or validation here
 	};
 
 	return (
@@ -145,9 +140,6 @@ const MappingPage = () => {
 						onChange={(selectedOptions) => setSelectedCrime(selectedOptions)}
 						placeholder="Select a crime type"
 					/>
-					{/* </div>
-
-				<div className="col-md-9 col-md-6 form-group"> */}
 					<label htmlFor="district">District:</label>
 					<Select
 						id="district"
@@ -159,7 +151,6 @@ const MappingPage = () => {
 				</div>
 
 				<div className="col-md-3 col-sm-6 form-group">
-					{/* <div className="col-md-2 col-md-6 form-group"> */}
 					<label>From:</label>
 					<DatePicker
 						selected={fromDate}
@@ -168,23 +159,18 @@ const MappingPage = () => {
 					/>
 					<br></br>
 					<br />
-					{/* </div> */}
-					{/* <div className="col-md-2 col-md-6 form-group"> */}
 					<label>To:</label>
 					<DatePicker
 						selected={toDate}
 						onChange={(date) => setToDate(date)}
 						dateFormat="yyyy/MM/dd"
 					/>
-
-					{/* </div> */}
 				</div>
 
 				<button type="submit" className="btn btn-primary">
 					Submit
 				</button>
 			</form>
-			{/* <div id="mapContainer"></div> */}
 			<div id="map">
 				{mapUrl && (
 					<iframe src={mapUrl} width="100%" height="500px" title="Crime Map" />

@@ -6,7 +6,6 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 // import Component
 import Header from "./component/Header";
-import ScrollToTop from "./component/ScrollToTop";
 
 // import Pages
 import Home from "./Pages/Home";
@@ -18,13 +17,11 @@ function App() {
 		<React.StrictMode>
 			<Router>
 				<Header />
-				<ScrollToTop>
-					<Switch>
-						<Route exact path="/" component={Home} />
-						<Route exact path="/prediction" component={PredictionPage} />
-						<Route exact path="/mapping" component={MappingPage} />
-					</Switch>
-				</ScrollToTop>
+				<Switch>
+					<Route exact path="/" component={Home} />
+					<Route exact path="/prediction" component={PredictionPage} />
+					<Route exact path="/mapping" component={MappingPage} />
+				</Switch>
 			</Router>
 		</React.StrictMode>
 	);
