@@ -48,6 +48,7 @@ function Header() {
 										</li>
 										<li>
 											<Link to="/prediction">Prediction</Link>
+											{/* <a href="/#prediction">Prediction</a> */}
 										</li>
 										<li>
 											<a href="/#service">Services</a>
