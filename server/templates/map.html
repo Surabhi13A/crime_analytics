@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Crime Map</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css"
+		/>
+		<style>
+			/* Add any custom styles here */
+			#map {
+				height: 500px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Crime Map</h1>
+		<div id="map"></div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+		<script>
+			// Use the map_filename variable passed from Flask to specify the map file path
+			var mapFile = "{{ map_filename }}";
+
+			// Create a map container and set its initial view
+			var map = L.map("map").setView([41.8781, -87.6298], 10);
+
+			// Add the tile layer to the map
+			L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+				attribution:
+					'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+				maxZoom: 18,
+			}).addTo(map);
+
+			// Add the map file as an iframe to the map container
+			var iframe = document.createElement("iframe");
+			iframe.src = mapFile;
+			iframe.width = "100%";
+			iframe.height = "500px";
+			document.getElementById("map").appendChild(iframe);
+		</script>
+	</body>
+</html>
