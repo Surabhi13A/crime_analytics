@@ -8,6 +8,11 @@ const PredictionPage = () => {
 	const [selectedDistrict, setSelectedDistrict] = useState(null);
 	const [hour, setHour] = useState(null);
 	const [selectedDate, setSelectedDate] = useState(null);
+	const [mapUrl, setMapUrl] = useState(null);
+
+	const [timestamp, setTimestamp] = useState(Date.now());
+
+	// const [HTMLCode, setHTMLCode] = useState("<!DOCTYPE html>		<html>		  <head>			<title>My HTML Page</title>		  </head>		  <body>			<h1>Hello, World!</h1>			<p>This is a sample HTML page rendered in a React component.</p> </body>		</html>")
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -22,27 +27,23 @@ const PredictionPage = () => {
 
 		try {
 			// Send the data to the Flask backend
-			fetch("/getPrediction", {
+			fetch("http://127.0.0.1:5000/getPrediction", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify(data),
 			})
-				.then((response) => response.text())
-				.then((html) => {
-					// Render the returned HTML template
-					const parser = new DOMParser();
-					const doc = parser.parseFromString(html, "text/html");
-					const mapContainer = document.getElementById("mapContainer");
-					mapContainer.innerHTML = "";
-					mapContainer.appendChild(doc.documentElement);
+				.then((response) => response.json())
+				.then((data) => {
+					setMapUrl(data);
+					console.log(data);
 				});
+				setTimestamp(Date.now());
 		} catch (error) {
 			// Handle network error
 			console.error("Network error:", error);
 		}
-		console.log(data);
 		console.log(JSON.stringify(data));
 	};
 
@@ -176,7 +177,18 @@ const PredictionPage = () => {
 				<button type="submit" className="btn btn-primary">
 					Submit
 				</button>
-				<div id="mapContainer"></div>
+				<div id="mapContainer">		
+				{mapUrl && (
+					<iframe
+						key={timestamp}
+						// key={timestamp} // Add a unique key to trigger iframe reload
+						src={`http://localhost:5000/map/${mapUrl}`}
+						width="100%"
+						height="500px"
+						title="Crime Map"
+					/>
+				)}		
+				</div>
 			</form>
 		</div>
 	);

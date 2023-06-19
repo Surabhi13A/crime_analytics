@@ -9,13 +9,13 @@ from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBRegressor
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import pickle
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-
-# df = pd.read_csv("chicagocrime.csv", low_memory=True, parse_dates=['Date'],  usecols=[
-#                  'Date', 'Primary Type', 'District', 'Year', 'Latitude', 'Longitude']) save
+CORS(app)
+# df = pd.read_csv("chicagocrime.csv", low_memory=True, parse_dates=['Date'],  usecols=['Date', 'Primary Type', 'District', 'Year', 'Latitude', 'Longitude'])
 
 # # serialise the dataframe
 # with open('serialized_df.pkl', 'wb') as file:
@@ -69,12 +69,12 @@ my_model_Latitude = built_train_model(train_X, train_y_Latitude)
 model_longitude_file = 'model_longitude.xgb'
 model_latitude_file = 'model_latitude.xgb'
 
-# Save the models
-# with open(model_longitude_file, 'wb') as file:
-#     pickle.dump(my_model_Longitude, file)
+#Save the models
+with open(model_longitude_file, 'wb') as file:
+    pickle.dump(my_model_Longitude, file)
 
-# with open(model_latitude_file, 'wb') as file:
-#     pickle.dump(my_model_Latitude, file)
+with open(model_latitude_file, 'wb') as file:
+    pickle.dump(my_model_Latitude, file)
 
 # Load the models
 with open(model_longitude_file, 'rb') as file:
@@ -89,26 +89,35 @@ chicago_map = folium.Map(
 # Function to create a circle marker with a radius of 1 km
 
 
+# def create_circle_marker(location):
+#     folium.CircleMarker(
+#         location=location,
+#         radius=5,  # Smaller radius of 0.5 km in meters
+#         color='blue',
+#         fill=True,
+#         fill_color='red'
+#     ).add_to(chicago_map)
+
 def create_circle_marker(location):
-    folium.CircleMarker(
+    folium.Marker(
         location=location,
-        radius=1000,  # Radius of 1 km in meters
-        color='blue',
-        fill=True,
-        fill_color='blue'
+        icon=folium.Icon(color='blue')
     ).add_to(chicago_map)
 
 
 @app.route('/getPrediction', methods=['POST'])
+@cross_origin()
 def predict():
     data = request.get_json()
+    print(data)
     date_parts = data["selectedDate"].split("-")
     month = date_parts[1]
     day = date_parts[2]
+
     data = {
         "Date_month": month,
-        "Date_day": day,
         "Date_hour": data["hour"],
+        "Date_day": day,
         "District": data["selectedDistrict"],
         "Primary Type": data["selectedCrime"]
     }
@@ -116,16 +125,40 @@ def predict():
     test_X = pd.get_dummies(test_X)
     test_X = test_X.reindex(columns=train_X.columns, fill_value=0)
 
+    test_X_encoded = pd.get_dummies(test_X)
+
+    # Align the columns of test_X_encoded with train_X
+    missing_columns = set(train_X.columns) - set(test_X_encoded.columns)
+    for column in missing_columns:
+        test_X_encoded[column] = 0
+
+    # Reorder the columns to match the order in train_X
+    test_X_encoded = test_X_encoded[train_X.columns]
+
     predict_Latitude, predict_Longitude = predict_location(
-        my_model_Longitude, my_model_Latitude, test_X)
+        my_model_Longitude, my_model_Latitude, test_X_encoded)
     predictions = {'Latitude': predict_Latitude.tolist(
     ), 'Longitude': predict_Longitude.tolist()}
 
     create_circle_marker([float(predict_Latitude), float(predict_Longitude)])
-    chicago_map.save('templates/prediction_map.html')
+    map_filename = 'prediction_map.html'
+    chicago_map.save(f'templates/{map_filename}')
 
-    return render_template('prediction_map.html')
+    # Remove existing prediction_map.html file if it exists
+    # existing_map_filename = 'prediction_map.html'
+    # if os.path.exists(f'templates/{existing_map_filename}'):
+    #     os.remove(f'templates/{existing_map_filename}')
 
+    # # Rename the newly created map file to prediction_map.html
+    # os.rename(f'templates/{map_filename}', f'templates/{existing_map_filename}')
+
+    map_content = render_template('prediction_map.html', map_filename=map_filename)
+    return jsonify(map_filename)
+
+@app.route('/map/<path:filename>')
+def serve_map(filename):
+    return send_from_directory('templates', filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
+

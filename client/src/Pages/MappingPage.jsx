@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -9,6 +9,8 @@ const MappingPage = () => {
 	const [fromDate, setFromDate] = useState(null);
 	const [toDate, setToDate] = useState(null);
 	const [mapUrl, setMapUrl] = useState(null);
+
+	const [timestamp, setTimestamp] = useState(Date.now());
 
 	const crimeOptions = [
 		{ value: "BATTERY", label: "Battery" },
@@ -96,27 +98,28 @@ const MappingPage = () => {
 			toDate: toDate.toISOString().split("T")[0],
 		};
 		try {
-			const response = await fetch("/getMap", {
+			fetch("http://127.0.0.1:5000/getMap", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify(data),
 			})
-				.then((response) => response.text())
+				.then((response) => response.json())
 				.then((data) => {
 					// Extract the map URL from the HTML
-					const regex = /var mapFile = "(.*?)"/;
-					const match = data.match(regex);
-					const mapFileUrl = match ? match[1] : null;
+					// const regex = /var mapFile = "(.*?)"/;
+					// const match = data.match(regex);
+					// const mapFileUrl = match ? match[1] : null;
 
 					// Assuming the response contains the HTML template
 					// const template = await response.text();
 					// const mapFile = await response.text();
 					// console.log(map);
-					setMapUrl(mapFileUrl);
+					setMapUrl(data);
+					console.log(data);
 				});
-			console.log(mapUrl);
+			setTimestamp(Date.now());
 
 			// Render the template
 			// document.getElementById("mapContainer").innerHTML = template;
@@ -172,8 +175,26 @@ const MappingPage = () => {
 				</button>
 			</form>
 			<div id="map">
-				{mapUrl && (
+				{/* {mapUrl && (
 					<iframe src={mapUrl} width="100%" height="500px" title="Crime Map" />
+				)} */}
+				{/* Render the HTML file if the form is submitted */}
+				{/* {mapUrl && (
+					<iframe
+						src={`/static/${mapUrl}`}
+						title="Map"
+						width="100%"
+						height="500px"
+					></iframe>
+				)} */}
+				{mapUrl && (
+					<iframe
+						key={timestamp} // Add a unique key to trigger iframe reload
+						src={`http://localhost:5000/map/${mapUrl}`}
+						width="100%"
+						height="500px"
+						title="Crime Map"
+					/>
 				)}
 			</div>
 		</div>

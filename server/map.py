@@ -1,13 +1,15 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import pandas as pd
 import folium
 import pickle
 from folium.plugins import MarkerCluster
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 
 
 @app.route('/getMap', methods=['GET', 'POST'])
+@cross_origin()
 def mapping():
     if request.method == 'POST':
         data = request.get_json()
@@ -70,14 +72,21 @@ def mapping():
         folium.LayerControl().add_to(chicago_map)
 
         # Save the map to HTML
-        map_filename = 'chicago_map_crime.html'
-        chicago_map.save(map_filename)
+        map_filename = 'map.html'
+        chicago_map.save(f'templates/{map_filename}')
+        # chicago_map.save(f"../client/public/{map_filename}")
 
         # Render the template with the map file name
-        # return render_template('map.html', map_filename=map_filename)
-        return map_filename
+        map_content = render_template('map.html', map_filename=map_filename)
+        return jsonify(map_filename)
+        # return map_filename
     # Render the form template for GET requests
     return render_template('form.html')
+
+
+@app.route('/map/<path:filename>')
+def serve_map(filename):
+    return send_from_directory('templates', filename)
 
 
 if __name__ == '__main__':

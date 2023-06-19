@@ -1,0 +1,6 @@
+serialized_df.pkl
+model_latitude.xgb
+model_longitude.xgb
+chicagocrime.csv
+
+/__pycache__/
