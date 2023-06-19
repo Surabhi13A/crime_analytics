@@ -1,1 +1,3 @@
-Crime analysis and prediction using XGBoost regressor nd folium library for visualization.
+Crime analysis
+
+Crime analysis and prediction using XGBoost regressor and folium library for visualization.
